@@ -1,4 +1,10 @@
-const { cadastrarAlunos, alterarNota, buscarAlunos } = require("./alunos");
+const {
+  cadastrarAlunos,
+  alterarNota,
+  buscarAlunos,
+  removerAluno,
+  relatorioTurma,
+} = require("./alunos");
 const { revalidarOpcao } = require("./validacao");
 const prompt = require("prompt-sync")();
 
@@ -6,6 +12,8 @@ console.log(" 1 - Cadastrar alunos ");
 console.log(" 2 - Buscar aluno ");
 console.log(" 3 - Alterar nota ");
 console.log(" 4 - Listar alunos ");
+console.log(" 5 - Remover aluno ");
+console.log(" 6 - Relatório da turma ");
 console.log(" 0 - Sair ");
 
 let turma = [];
@@ -53,7 +61,35 @@ while (encerrar === false) {
       console.log(turma);
       break;
 
+    case 5:
+      console.log(" Remover aluno ");
+      let nomeRemover = prompt("Digite o nome do aluno que quer remover: ");
+      let alunoRemovido = removerAluno(turma, nomeRemover);
+      if (alunoRemovido) {
+        console.log(`aluno ${nomeRemover} removido`);
+      } else {
+        console.log("aluno não existente na lista");
+      }
+      break;
+    case 6:
+      console.log(" Relatório da Turma ");
+      if (relatorioTurma(turma) === null) {
+        break;
+      } else {
+        let relatorio = relatorioTurma(turma);
+        console.log("Quantidade total de alunos: ", relatorio.quantidadeAlunos);
+        console.log("Media geral das notas: ", relatorio.mediaT);
+        console.log("Maior nota da turma: ", relatorio.notaMaior);
+        console.log("Menor nota da turma: ", relatorio.notaMenor);
+        console.log(
+          "Quantidade de aprovados e reprovados: ",
+          relatorio.aprovadosEreprovados,
+        );
+        break;
+      }
+
     default:
       console.log("opção invalida");
+      break;
   }
 }
