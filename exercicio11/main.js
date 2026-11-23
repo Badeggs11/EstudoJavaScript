@@ -4,21 +4,17 @@ const {
   buscarAlunos,
   removerAluno,
   relatorioTurma,
+  resumoAprovados,
+  menu,
 } = require("./alunos");
 const { revalidarOpcao } = require("./validacao");
+const { salvarTurma, carregarTurma } = require("./persistencia");
 const prompt = require("prompt-sync")();
 
-console.log(" 1 - Cadastrar alunos ");
-console.log(" 2 - Buscar aluno ");
-console.log(" 3 - Alterar nota ");
-console.log(" 4 - Listar alunos ");
-console.log(" 5 - Remover aluno ");
-console.log(" 6 - Relatório da turma ");
-console.log(" 0 - Sair ");
-
-let turma = [];
+let turma = carregarTurma("./alunos.json");
 let encerrar = false;
 while (encerrar === false) {
+  menu();
   let opcao = Number(prompt("Digite a opção: "));
 
   switch (opcao) {
@@ -34,6 +30,7 @@ while (encerrar === false) {
       );
       turma = cadastrarAlunos(qtdAlunos, turma);
       console.log("Turma cadastrada: ", turma);
+      salvarTurma(turma);
       break;
 
     case 2:
@@ -53,6 +50,7 @@ while (encerrar === false) {
         let novaNota = prompt("Digite a nova nota: ");
         let resultado = alterarNota(turma, alunoAlterar, novaNota);
         console.log("Nota do aluno alterado: ", resultado);
+        salvarTurma(turma);
         break;
       }
 
@@ -65,7 +63,9 @@ while (encerrar === false) {
       console.log(" Remover aluno ");
       let nomeRemover = prompt("Digite o nome do aluno que quer remover: ");
       let alunoRemovido = removerAluno(turma, nomeRemover);
+
       if (alunoRemovido) {
+        salvarTurma(turma);
         console.log(`aluno ${nomeRemover} removido`);
       } else {
         console.log("aluno não existente na lista");
@@ -73,10 +73,10 @@ while (encerrar === false) {
       break;
     case 6:
       console.log(" Relatório da Turma ");
-      if (relatorioTurma(turma) === null) {
+      let relatorio = relatorioTurma(turma);
+      if (relatorio === null) {
         break;
       } else {
-        let relatorio = relatorioTurma(turma);
         console.log("Quantidade total de alunos: ", relatorio.quantidadeAlunos);
         console.log("Media geral das notas: ", relatorio.mediaT);
         console.log("Maior nota da turma: ", relatorio.notaMaior);
@@ -87,6 +87,23 @@ while (encerrar === false) {
         );
         break;
       }
+    case 7:
+      console.log(" Resumo dos Aprovados ");
+      let resumo = resumoAprovados(turma);
+      console.log(resumo);
+      break;
+
+    case 8:
+      console.log(" Gravando arquivo ");
+      salvarTurma(turma);
+      break;
+
+    case 9:
+      console.log(" Lendo arquivo ");
+      let caminho = "./alunos.json";
+      const arquivo = carregarTurma(caminho);
+      console.log(arquivo);
+      break;
 
     default:
       console.log("opção invalida");
