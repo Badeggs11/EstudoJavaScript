@@ -11,7 +11,17 @@ const { revalidarOpcao } = require("./validacao");
 const { salvarTurma, carregarTurma } = require("./persistencia");
 const prompt = require("prompt-sync")();
 
-let turma = carregarTurma("./alunos.json");
+let turma;
+let alteracoesPendentes = false;
+let salvou = true;
+
+try {
+  turma = carregarTurma("./alunos.json");
+} catch (erro) {
+  console.log("Falha no carregamento da turma.");
+  console.log(erro.message);
+  process.exit(1);
+}
 let encerrar = false;
 while (encerrar === false) {
   menu();
@@ -19,6 +29,10 @@ while (encerrar === false) {
 
   switch (opcao) {
     case 0:
+      if (alteracoesPendentes === true) {
+        console.log("Existem alterações não salvas!");
+        break;
+      }
       console.log(" Até a próxima! ");
       encerrar = true;
       break;
@@ -30,7 +44,13 @@ while (encerrar === false) {
       );
       turma = cadastrarAlunos(qtdAlunos, turma);
       console.log("Turma cadastrada: ", turma);
-      salvarTurma(turma);
+      salvou = salvarTurma(turma);
+      alteracoesPendentes = !salvou;
+
+      if (salvou) {
+        console.log("Turma salva");
+      }
+
       break;
 
     case 2:
@@ -50,7 +70,12 @@ while (encerrar === false) {
         let novaNota = prompt("Digite a nova nota: ");
         let resultado = alterarNota(turma, alunoAlterar, novaNota);
         console.log("Nota do aluno alterado: ", resultado);
-        salvarTurma(turma);
+        salvou = salvarTurma(turma);
+        alteracoesPendentes = !salvou;
+
+        if (salvou) {
+          console.log("Turma salva");
+        }
         break;
       }
 
@@ -65,7 +90,12 @@ while (encerrar === false) {
       let alunoRemovido = removerAluno(turma, nomeRemover);
 
       if (alunoRemovido) {
-        salvarTurma(turma);
+        salvou = salvarTurma(turma);
+        alteracoesPendentes = !salvou;
+
+        if (salvou) {
+          console.log("Turma salva");
+        }
         console.log(`aluno ${nomeRemover} removido`);
       } else {
         console.log("aluno não existente na lista");
@@ -95,14 +125,28 @@ while (encerrar === false) {
 
     case 8:
       console.log(" Gravando arquivo ");
-      salvarTurma(turma);
+      salvou = salvarTurma(turma);
+      alteracoesPendentes = !salvou;
+
+      if (salvou) {
+        console.log("Turma salva");
+      }
       break;
 
     case 9:
       console.log(" Lendo arquivo ");
-      let caminho = "./alunos.json";
-      const arquivo = carregarTurma(caminho);
-      console.log(arquivo);
+      if (alteracoesPendentes) {
+        console.log("Há salvamentos pendentes");
+        break;
+      }
+      try {
+        let caminho = "./alunos.json";
+        turma = carregarTurma(caminho);
+      } catch (erro) {
+        console.log(erro.message);
+      }
+
+      console.log(turma);
       break;
 
     default:
